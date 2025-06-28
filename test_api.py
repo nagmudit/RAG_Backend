@@ -48,10 +48,42 @@ def test_ask(query):
         print(f"Answer: {result.get('answer')}")
         print(f"Citations ({len(result.get('citations', []))}):")
         for i, citation in enumerate(result.get('citations', []), 1):
-            print(f"  {i}. {citation.get('title')} - {citation.get('url')}")
+            source_type = citation.get('source_type', 'url')
+            print(f"  {i}. {citation.get('title')} ({source_type})")
+            print(f"     Source: {citation.get('url')}")
             print(f"     Relevance: {citation.get('relevance_score', 0):.3f}")
     else:
         print(f"Error: {response.text}")
+    print()
+
+def test_document_upload(file_path):
+    """Test the document upload endpoint."""
+    print(f"Testing document upload with file: {file_path}")
+    
+    try:
+        with open(file_path, 'rb') as file:
+            files = {'file': (file_path.split('/')[-1], file)}
+            response = requests.post(f"{BASE_URL}/upload", files=files)
+        
+        print(f"Status: {response.status_code}")
+        
+        if response.status_code == 200:
+            result = response.json()
+            print(f"Success: {result.get('success')}")
+            print(f"Message: {result.get('message')}")
+            print(f"Filename: {result.get('filename')}")
+            print(f"File type: {result.get('file_type')}")
+            print(f"Documents added: {result.get('documents_added')}")
+            return result.get('success', False)
+        else:
+            print(f"Error: {response.text}")
+            return False
+    except FileNotFoundError:
+        print(f"Error: File not found - {file_path}")
+        return False
+    except Exception as e:
+        print(f"Error: {e}")
+        return False
     print()
 
 def get_stats():
@@ -98,6 +130,9 @@ def main():
             test_ask(query)
     else:
         print("❌ Scraping failed, skipping question tests")
+    
+    # Test document upload
+    test_document_upload("example.pdf")
     
     print("✅ Test script completed!")
 

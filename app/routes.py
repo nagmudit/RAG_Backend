@@ -1,15 +1,17 @@
 import asyncio
 import logging
 from typing import List
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
 from app.models import (
     ScrapeRequest, ScrapeResponse,
+    DocumentUploadResponse,
     AskRequest, AskResponse, Citation,
     HealthResponse
 )
 from app.scraper import web_scraper
 from app.vectorstore import faiss_vectorstore
 from app.llm_setup import mistral_llm_setup
+from app.document_processor import document_processor
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -91,6 +93,81 @@ async def scrape_urls(request: ScrapeRequest, background_tasks: BackgroundTasks)
         logger.error(f"Error in scrape endpoint: {e}")
         raise HTTPException(status_code=500, detail=f"Scraping failed: {str(e)}")
 
+@router.post("/upload", response_model=DocumentUploadResponse)
+async def upload_document(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...)
+):
+    """Upload and process a document for RAG."""
+    try:
+        # Validate file type
+        allowed_extensions = {'.pdf', '.docx', '.xlsx', '.md'}
+        file_extension = None
+        if file.filename:
+            file_extension = '.' + file.filename.split('.')[-1].lower()
+        
+        if not file_extension or file_extension not in allowed_extensions:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unsupported file format. Allowed formats: {', '.join(allowed_extensions)}"
+            )
+        
+        # Validate file size (limit to 50MB)
+        max_size = 50 * 1024 * 1024  # 50MB in bytes
+        file_content = await file.read()
+        
+        if len(file_content) > max_size:
+            raise HTTPException(
+                status_code=400,
+                detail="File size too large. Maximum size is 50MB."
+            )
+        
+        if len(file_content) == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="File is empty."
+            )
+        
+        logger.info(f"Processing uploaded file: {file.filename} ({len(file_content)} bytes)")
+        
+        # Process the document
+        documents = await document_processor.process_uploaded_file(
+            file_content, file.filename
+        )
+        
+        if not documents:
+            return DocumentUploadResponse(
+                success=False,
+                message="No content could be extracted from the document",
+                filename=file.filename,
+                documents_added=0,
+                file_type=file_extension
+            )
+        
+        # Add documents to vectorstore in background
+        def add_to_vectorstore():
+            try:
+                docs_added = faiss_vectorstore.add_documents(documents)
+                logger.info(f"Added {docs_added} documents from {file.filename} to vectorstore")
+            except Exception as e:
+                logger.error(f"Error adding documents to vectorstore: {e}")
+        
+        background_tasks.add_task(add_to_vectorstore)
+        
+        return DocumentUploadResponse(
+            success=True,
+            message=f"Successfully processed {file.filename}",
+            filename=file.filename,
+            documents_added=len(documents),
+            file_type=file_extension
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in upload endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Document upload failed: {str(e)}")
+
 @router.post("/ask", response_model=AskResponse)
 async def ask_question(request: AskRequest):
     """Ask a question and get RAG-powered answer."""
@@ -130,20 +207,30 @@ async def ask_question(request: AskRequest):
         
         # Create citations
         citations = []
-        seen_urls = set()
+        seen_sources = set()
         
         for doc, score in zip(documents, scores):
-            url = doc.metadata.get('source', '')
+            source = doc.metadata.get('source', '')
             title = doc.metadata.get('title', 'No title')
+            file_type = doc.metadata.get('file_type', '')
             
-            # Avoid duplicate URLs in citations
-            if url and url not in seen_urls:
+            # Determine source type and create appropriate citation
+            if source and source not in seen_sources:
+                # Check if it's a URL or filename
+                if source.startswith('http://') or source.startswith('https://'):
+                    source_type = "url"
+                    url = source
+                else:
+                    source_type = "document"
+                    url = f"Uploaded file: {source}"
+                
                 citations.append(Citation(
                     url=url,
                     title=title,
-                    relevance_score=float(1.0 - score)  # Convert distance to similarity
+                    relevance_score=float(1.0 - score),  # Convert distance to similarity
+                    source_type=source_type
                 ))
-                seen_urls.add(url)
+                seen_sources.add(source)
         
         # Limit to top 5 citations
         citations = citations[:5]

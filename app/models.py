@@ -13,15 +13,24 @@ class ScrapeResponse(BaseModel):
     failed_urls: List[str]
     documents_added: int
 
+class DocumentUploadResponse(BaseModel):
+    """Response model for document upload endpoint."""
+    success: bool
+    message: str
+    filename: str
+    documents_added: int
+    file_type: str
+
 class AskRequest(BaseModel):
     """Request model for the ask endpoint."""
     query: str
     
 class Citation(BaseModel):
     """Model for document citations."""
-    url: str
+    url: Optional[str] = None
     title: Optional[str] = None
     relevance_score: float
+    source_type: Optional[str] = "url"  # "url" or "document"
 
 class AskResponse(BaseModel):
     """Response model for the ask endpoint."""

@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI application
 app = FastAPI(
     title="RAG Backend",
-    description="A FastAPI-based Retrieval-Augmented Generation backend using Mistral LLM, LangChain, and FAISS",
+    description="A FastAPI-based Retrieval-Augmented Generation backend using Mistral LLM, LangChain, and FAISS. Supports web scraping and document upload (PDF, DOCX, XLSX, MD).",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -62,8 +62,20 @@ async def root():
     return {
         "message": "RAG Backend API",
         "version": "1.0.0",
+        "features": [
+            "Web scraping and content extraction",
+            "Document upload (PDF, DOCX, XLSX, MD)",
+            "Vector search with FAISS",
+            "RAG-powered question answering"
+        ],
         "docs": "/docs",
-        "health": "/api/v1/health"
+        "health": "/api/v1/health",
+        "endpoints": {
+            "scrape": "/api/v1/scrape",
+            "upload": "/api/v1/upload",
+            "ask": "/api/v1/ask",
+            "stats": "/api/v1/stats"
+        }
     }
 
 if __name__ == "__main__":
