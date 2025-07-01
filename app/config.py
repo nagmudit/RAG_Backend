@@ -23,6 +23,15 @@ class Settings(BaseSettings):
     # Retrieval configuration
     top_k_documents: int = 5
     
+    # Rate limiting configuration
+    llm_min_request_interval: float = 2.0  # Minimum seconds between LLM requests
+    llm_base_delay: float = 5.0  # Base delay for LLM rate limiting
+    llm_max_retries: int = 3  # Maximum retries for LLM requests
+    
+    embedding_min_request_interval: float = 1.0  # Minimum seconds between embedding requests
+    embedding_max_retries: int = 2  # Maximum retries for embedding requests
+    embedding_batch_size: int = 20  # Batch size for embedding requests
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

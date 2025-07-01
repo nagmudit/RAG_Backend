@@ -6,6 +6,7 @@ import faiss
 import numpy as np
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
+from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_core.vectorstores import VectorStoreRetriever
 from app.config import settings
 from app.embedding import mistral_embedding
@@ -23,19 +24,26 @@ class FAISSVectorStore:
     def _create_new_vectorstore(self) -> FAISS:
         """Create a new FAISS vectorstore."""
         try:
-            # Create a dummy document to initialize the vectorstore
-            dummy_doc = Document(
-                page_content="Initialization document",
-                metadata={"source": "init", "title": "Init"}
+            # Get embeddings instance
+            embeddings = mistral_embedding.get_embeddings()
+            
+            # Create an empty FAISS index directly
+            # Get embedding dimension from a test embedding
+            test_embedding = embeddings.embed_query("test")
+            dimension = len(test_embedding)
+            
+            # Create empty FAISS index
+            index = faiss.IndexFlatL2(dimension)
+            
+            # Create vectorstore with empty index
+            vectorstore = FAISS(
+                embedding_function=embeddings,
+                index=index,
+                docstore=InMemoryDocstore({}),
+                index_to_docstore_id={}
             )
             
-            embeddings = mistral_embedding.get_embeddings()
-            vectorstore = FAISS.from_documents([dummy_doc], embeddings)
-            
-            # Remove the dummy document
-            vectorstore.delete([0])
-            
-            logger.info("Created new FAISS vectorstore")
+            logger.info(f"Created new FAISS vectorstore with dimension {dimension}")
             return vectorstore
             
         except Exception as e:

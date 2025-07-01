@@ -261,3 +261,30 @@ async def get_stats():
     except Exception as e:
         logger.error(f"Error getting stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to get stats")
+
+@router.get("/rate-limit-stats")
+async def get_rate_limit_stats():
+    """Get rate limiting statistics."""
+    try:
+        from app.llm_setup import mistral_llm_setup
+        from app.embedding import mistral_embedding
+        
+        return {
+            "llm_stats": {
+                "last_request_time": mistral_llm_setup._last_request_time,
+                "min_request_interval": mistral_llm_setup._min_request_interval,
+                "base_delay": mistral_llm_setup._base_delay
+            },
+            "embedding_stats": {
+                "last_request_time": mistral_embedding._last_request_time,
+                "min_request_interval": mistral_embedding._min_request_interval
+            },
+            "config": {
+                "llm_max_retries": settings.llm_max_retries,
+                "embedding_max_retries": settings.embedding_max_retries,
+                "embedding_batch_size": settings.embedding_batch_size
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting rate limit stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get rate limit stats")
