@@ -6,7 +6,9 @@ from app.models import (
     ScrapeRequest, ScrapeResponse,
     DocumentUploadResponse,
     AskRequest, AskResponse, Citation,
-    HealthResponse
+    HealthResponse,
+    ClearRequest, ClearResponse,
+    VectorstoreInfoResponse
 )
 from app.scraper import web_scraper
 from app.vectorstore import faiss_vectorstore
@@ -288,3 +290,57 @@ async def get_rate_limit_stats():
     except Exception as e:
         logger.error(f"Error getting rate limit stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to get rate limit stats")
+
+@router.post("/clear", response_model=ClearResponse)
+async def clear_knowledge_base(request: ClearRequest):
+    """Clear the entire knowledge base and vectorstore."""
+    try:
+        if not request.confirm:
+            raise HTTPException(
+                status_code=400, 
+                detail="Confirmation required. Set 'confirm: true' to proceed with clearing the knowledge base."
+            )
+        
+        logger.info("Starting to clear knowledge base")
+        
+        # Get current document count before clearing
+        current_info = faiss_vectorstore.get_vectorstore_info()
+        documents_count = current_info.get("document_count", 0)
+        
+        # Clear the vectorstore
+        success = faiss_vectorstore.clear_vectorstore()
+        
+        if success:
+            logger.info(f"Successfully cleared knowledge base with {documents_count} documents")
+            return ClearResponse(
+                success=True,
+                message=f"Successfully cleared knowledge base. Removed {documents_count} documents and deleted index files.",
+                documents_cleared=documents_count
+            )
+        else:
+            logger.error("Failed to clear knowledge base")
+            raise HTTPException(status_code=500, detail="Failed to clear knowledge base")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in clear endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Clear operation failed: {str(e)}")
+
+@router.get("/vectorstore-info", response_model=VectorstoreInfoResponse)
+async def get_vectorstore_info():
+    """Get information about the current vectorstore."""
+    try:
+        info = faiss_vectorstore.get_vectorstore_info()
+        
+        return VectorstoreInfoResponse(
+            document_count=info.get("document_count", 0),
+            vectorstore_loaded=info.get("vectorstore_loaded", False),
+            index_exists_on_disk=info.get("index_exists_on_disk", False),
+            index_path=info.get("index_path", ""),
+            error=info.get("error")
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting vectorstore info: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get vectorstore information")

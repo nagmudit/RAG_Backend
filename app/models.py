@@ -43,3 +43,22 @@ class HealthResponse(BaseModel):
     status: str
     message: str
     faiss_index_exists: bool
+
+class ClearRequest(BaseModel):
+    """Request model for clearing the knowledge base."""
+    confirm: bool = False
+    
+class ClearResponse(BaseModel):
+    """Response model for clearing the knowledge base."""
+    success: bool
+    message: str
+    files_deleted: List[str] = []
+    documents_cleared: int = 0
+
+class VectorstoreInfoResponse(BaseModel):
+    """Response model for vectorstore information."""
+    document_count: int
+    vectorstore_loaded: bool
+    index_exists_on_disk: bool
+    index_path: str
+    error: Optional[str] = None

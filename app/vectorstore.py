@@ -220,6 +220,53 @@ class FAISSVectorStore:
         index_file = f"{self.index_path}.faiss"
         pkl_file = f"{self.index_path}.pkl"
         return os.path.exists(index_file) and os.path.exists(pkl_file)
+    
+    def clear_vectorstore(self) -> bool:
+        """Clear all documents from the vectorstore and delete index files."""
+        try:
+            # Clear in-memory data
+            self._vectorstore = None
+            self._documents = []
+            
+            # Delete index files from disk
+            index_file = f"{self.index_path}.faiss"
+            pkl_file = f"{self.index_path}.pkl"
+            
+            files_deleted = []
+            
+            if os.path.exists(index_file):
+                os.remove(index_file)
+                files_deleted.append(index_file)
+                
+            if os.path.exists(pkl_file):
+                os.remove(pkl_file)
+                files_deleted.append(pkl_file)
+            
+            logger.info(f"Cleared vectorstore and deleted files: {files_deleted}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error clearing vectorstore: {e}")
+            return False
+    
+    def get_vectorstore_info(self) -> dict:
+        """Get information about the current vectorstore."""
+        try:
+            return {
+                "document_count": len(self._documents),
+                "vectorstore_loaded": self._vectorstore is not None,
+                "index_exists_on_disk": self.index_exists(),
+                "index_path": self.index_path
+            }
+        except Exception as e:
+            logger.error(f"Error getting vectorstore info: {e}")
+            return {
+                "document_count": 0,
+                "vectorstore_loaded": False,
+                "index_exists_on_disk": False,
+                "index_path": self.index_path,
+                "error": str(e)
+            }
 
 # Global vectorstore instance
 faiss_vectorstore = FAISSVectorStore()

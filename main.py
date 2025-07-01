@@ -74,7 +74,10 @@ async def root():
             "scrape": "/api/v1/scrape",
             "upload": "/api/v1/upload",
             "ask": "/api/v1/ask",
-            "stats": "/api/v1/stats"
+            "clear": "/api/v1/clear",
+            "stats": "/api/v1/stats",
+            "vectorstore_info": "/api/v1/vectorstore-info",
+            "rate_limit_stats": "/api/v1/rate-limit-stats"
         }
     }
 

@@ -48,7 +48,11 @@ start_server.bat
 
 - `POST /scrape` - Scrape content from URLs and add to vectorstore
 - `POST /ask` - Ask questions and get RAG-powered answers
+- `POST /clear` - Clear the entire knowledge base (requires confirmation)
 - `GET /health` - Health check endpoint
+- `GET /stats` - Get vectorstore statistics
+- `GET /vectorstore-info` - Get detailed vectorstore information
+- `GET /rate-limit-stats` - Get rate limiting statistics
 
 ## Project Structure
 
