@@ -1,37 +1,37 @@
 # Build dependencies (must be first)
-setuptools==69.1.0
-wheel==0.42.0
-pip==24.0
+setuptools>=69.1.0
+wheel>=0.42.0
+pip>=24.0
 
 # Core FastAPI and server dependencies
-fastapi==0.104.1
-uvicorn==0.24.0
-gunicorn==21.2.0
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+gunicorn>=21.2.0
 
 # Numerical computing with Python 3.13 compatibility
-numpy==1.24.4
+numpy>=1.26.0
 
-# Vector database with compatible numpy version
-faiss-cpu==1.7.4
+# Vector database with Python 3.13 compatibility
+faiss-cpu>=1.8.0
 
 # LangChain and AI dependencies
-langchain==0.1.0
-langchain-community==0.0.10
-langchain-mistralai==0.0.1
+langchain>=0.1.0
+langchain-community>=0.0.10
+langchain-mistralai>=0.0.1
 
 # Web scraping and utility dependencies
-beautifulsoup4==4.12.2
-requests==2.31.0
-python-dotenv==1.0.0
-python-multipart==0.0.6
-aiofiles==23.2.1
+beautifulsoup4>=4.12.2
+requests>=2.31.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.6
+aiofiles>=23.2.1
 
 # Pydantic and validation
-pydantic==2.5.0
-pydantic-settings==2.0.3
+pydantic>=2.5.0
+pydantic-settings>=2.0.3
 
 # Document processing
-pypdf2==3.0.1
-python-docx==1.1.0
-openpyxl==3.1.2
-markdown==3.5.1
+pypdf2>=3.0.1
+python-docx>=1.1.0
+openpyxl>=3.1.2
+markdown>=3.5.1

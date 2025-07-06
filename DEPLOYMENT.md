@@ -4,11 +4,11 @@ This guide explains how to deploy your RAG Backend to Render.
 
 ## 🚀 Quick Deployment Steps
 
-### Method 1: Using Render Dashboard
+### Method 1: Using Docker (Recommended)
 
 1. **Fork/Clone Repository**
    - Push your code to GitHub
-   - Make sure `start.sh` is executable: `chmod +x start.sh`
+   - Make sure `Dockerfile` exists in root
 
 2. **Create New Web Service on Render**
    - Go to [Render Dashboard](https://dashboard.render.com/)
@@ -17,11 +17,9 @@ This guide explains how to deploy your RAG Backend to Render.
 
 3. **Configure Service**
    - **Name**: `rag-backend` (or your preferred name)
-   - **Runtime**: `Python 3`
-   - **Build Command**: `./start.sh`
-   - **Start Command**: `./start.sh`
+   - **Runtime**: `Docker`
+   - **Dockerfile Path**: `./Dockerfile`
    - **Plan**: Free (or paid for better performance)
-   - **Python Version**: 3.11.5 (specified in runtime.txt)
 
 4. **Set Environment Variables**
    ```
@@ -40,21 +38,42 @@ This guide explains how to deploy your RAG Backend to Render.
    - Click "Create Web Service"
    - Wait for deployment to complete
 
-### Method 2: Using render.yaml (Infrastructure as Code)
+### Method 2: Using Python Runtime (Alternative)
 
-1. **Add render.yaml to Repository**
-   - The `render.yaml` file is already included
-   - Commit and push to your GitHub repository
+1. **If Docker fails**, use the Python runtime approach:
+   - **Runtime**: `Python 3`
+   - **Build Command**: `./start.sh`
+   - **Start Command**: `./start.sh`
+   - **Use**: `render-python.yaml` instead of `render.yaml`
 
-2. **Connect to Render**
-   - Go to Render Dashboard
-   - Click "New" → "Blueprint"
-   - Connect your repository
-   - Render will automatically detect the `render.yaml` configuration
+2. **The start.sh script will**:
+   - Try minimal requirements first (latest compatible versions)
+   - Fall back to full requirements if minimal fails
+   - Show detailed build output for debugging
 
-3. **Set Sensitive Environment Variables**
-   - Go to your service settings
-   - Add your `MISTRAL_API_KEY` in the Environment tab
+### Method 3: Using Render Infrastructure as Code
+
+1. **Using render.yaml (Docker)**:
+   ```bash
+   render-cli deploy
+   ```
+
+2. **Using render-python.yaml (Python)**:
+   ```bash
+   render-cli deploy --config render-python.yaml
+   ```
+
+## 📋 Deployment Files
+
+| File | Purpose | When to Use |
+|------|---------|-------------|
+| `Dockerfile` | Docker container config | **Recommended** - Most reliable |
+| `render.yaml` | Docker-based Render config | Primary deployment |
+| `render-python.yaml` | Python-based Render config | Docker fallback |
+| `requirements.txt` | Full Python dependencies | Standard approach |
+| `requirements-minimal.txt` | Minimal dependencies | Quick deployment |
+| `start.sh` | Startup script | Python runtime only |
+| `runtime.txt` | Python version specification | Python runtime only |
 
 ## 🔧 Production Configuration
 

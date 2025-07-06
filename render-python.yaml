@@ -1,10 +1,13 @@
 services:
   - type: web
     name: rag-backend
-    runtime: docker
-    dockerfilePath: ./Dockerfile
+    runtime: python3
+    buildCommand: "./start.sh"
+    startCommand: "./start.sh"
     plan: free
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: MISTRAL_API_KEY
         sync: false  # Set this manually in Render dashboard
       - key: FAISS_INDEX_PATH
@@ -25,6 +28,6 @@ services:
         value: "20"
     healthCheckPath: /api/v1/health
     disk:
-      name: data
+      name: rag-backend-data
       mountPath: /opt/render/project/src/data
       sizeGB: 1

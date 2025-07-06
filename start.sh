@@ -13,11 +13,21 @@ export PYTHONUNBUFFERED=1
 mkdir -p data
 
 echo "📦 Installing Python dependencies..."
-# Upgrade pip and install build dependencies first
-pip install --upgrade pip setuptools wheel
+# Show Python version
+python --version
 
-# Install requirements
-pip install -r requirements.txt
+# Upgrade pip and install build dependencies first
+python -m pip install --upgrade pip
+pip install --upgrade setuptools wheel
+
+# Try minimal requirements first (latest compatible versions)
+echo "🔄 Attempting minimal requirements installation..."
+if pip install -r requirements-minimal.txt --timeout=300; then
+    echo "✅ Minimal requirements installed successfully"
+else
+    echo "⚠️ Minimal requirements failed, trying full requirements..."
+    pip install -r requirements.txt --verbose --timeout=300
+fi
 
 echo "🔧 Validating configuration..."
 python -c "

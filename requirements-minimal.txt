@@ -1,0 +1,20 @@
+# Minimal requirements for Python 3.13 compatibility
+fastapi
+uvicorn[standard]
+gunicorn
+numpy
+faiss-cpu
+langchain
+langchain-community
+langchain-mistralai
+beautifulsoup4
+requests
+python-dotenv
+python-multipart
+aiofiles
+pydantic
+pydantic-settings
+pypdf2
+python-docx
+openpyxl
+markdown
