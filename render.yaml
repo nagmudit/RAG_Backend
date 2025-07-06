@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: rag-backend
+    runtime: python3
+    buildCommand: "./start.sh"
+    startCommand: "./start.sh"
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.1
+      - key: MISTRAL_API_KEY
+        sync: false  # Set this manually in Render dashboard
+      - key: FAISS_INDEX_PATH
+        value: "./data/faiss_index"
+      - key: LOG_LEVEL
+        value: "INFO"
+      - key: LLM_MIN_REQUEST_INTERVAL
+        value: "2.0"
+      - key: LLM_BASE_DELAY
+        value: "5.0"
+      - key: LLM_MAX_RETRIES
+        value: "3"
+      - key: EMBEDDING_MIN_REQUEST_INTERVAL
+        value: "1.0"
+      - key: EMBEDDING_MAX_RETRIES
+        value: "2"
+      - key: EMBEDDING_BATCH_SIZE
+        value: "20"
+    healthCheckPath: /api/v1/health
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

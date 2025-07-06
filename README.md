@@ -68,5 +68,19 @@ start_server.bat
 │   ├── scraper.py         # Web scraping functionality
 │   └── routes.py          # API route handlers
 ├── data/                  # FAISS index storage
-└── requirements.txt
+├── requirements.txt       # Python dependencies
+├── start.sh              # Production startup script for Render
+├── render.yaml           # Render deployment configuration
+├── DEPLOYMENT.md         # Deployment guide for Render
+└── README.md
 ```
+
+## 🚀 Deployment
+
+For production deployment on Render, see [DEPLOYMENT.md](DEPLOYMENT.md) for detailed instructions.
+
+Quick deployment:
+1. Push code to GitHub
+2. Connect repository to Render
+3. Set `MISTRAL_API_KEY` environment variable
+4. Deploy using `start.sh`
