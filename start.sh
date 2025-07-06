@@ -38,6 +38,8 @@ try:
     print(f'📁 FAISS index path: {settings.faiss_index_path}')
     print(f'🤖 LLM model: {settings.mistral_llm_model}')
     print(f'🔗 Embedding model: {settings.mistral_embed_model}')
+    print(f'🌐 Health check endpoint: /api/v1/health')
+    print(f'📚 API docs endpoint: /docs')
     if settings.mistral_api_key and settings.mistral_api_key != 'your_mistral_api_key_here':
         print('✅ Mistral API key is configured')
     else:
