@@ -21,6 +21,7 @@ This guide explains how to deploy your RAG Backend to Render.
    - **Build Command**: `./start.sh`
    - **Start Command**: `./start.sh`
    - **Plan**: Free (or paid for better performance)
+   - **Python Version**: 3.11.5 (specified in runtime.txt)
 
 4. **Set Environment Variables**
    ```
@@ -101,30 +102,59 @@ https://your-service-name.onrender.com
 - **Ask**: `POST https://your-service-name.onrender.com/api/v1/ask`
 - **Clear**: `POST https://your-service-name.onrender.com/api/v1/clear`
 
-## 🐛 Troubleshooting
+## 🔧 Troubleshooting
 
-### Common Issues:
+### Common Build Issues
 
-1. **Build Fails**
-   - Check that `start.sh` is executable: `chmod +x start.sh`
-   - Verify all dependencies are in `requirements.txt`
+#### 1. setuptools.build_meta Import Error
+**Error**: `ModuleNotFoundError: No module named 'setuptools.build_meta'`
+**Solution**: 
+- Python 3.11.5 is specified in `runtime.txt`
+- Build dependencies are installed first in `start.sh`
+- `pyproject.toml` provides modern build configuration
 
-2. **Service Won't Start**
-   - Check logs in Render dashboard
-   - Verify `MISTRAL_API_KEY` is set correctly
+#### 2. Numpy/FAISS Compatibility Issues
+**Error**: Build fails with numpy version conflicts
+**Solution**:
+- Using numpy 1.24.4 for Python 3.11 compatibility
+- FAISS-CPU 1.7.4 is compatible with this numpy version
+- Build tools (setuptools, wheel) are installed first
 
-3. **Memory Issues**
-   - Consider upgrading from free tier
-   - Reduce `EMBEDDING_BATCH_SIZE` if needed
+#### 3. Dependency Installation Timeout
+**Error**: Build times out during package installation
+**Solution**:
+- Requirements.txt uses specific, compatible versions
+- Consider upgrading to paid plan for faster builds
+- Check Render build logs for specific package issues
 
-4. **Rate Limiting**
-   - Adjust rate limiting parameters in environment variables
-   - Monitor logs for rate limit errors
+#### 4. Environment Variable Issues
+**Error**: Missing API keys or configuration
+**Solution**:
+- Set `MISTRAL_API_KEY` in Render dashboard
+- Verify all required environment variables are set
+- Check `/health` endpoint after deployment
 
-### Log Monitoring:
-- View logs in Render dashboard
-- All application logs are output to stdout/stderr
-- Health check status is monitored automatically
+#### 5. Service Won't Start
+**Error**: Service fails to start after successful build
+**Solution**:
+- Check logs for specific error messages
+- Verify `start.sh` is executable
+- Ensure all dependencies are installed correctly
+- Test API key validity
+
+### Testing Deployment
+
+1. **Health Check**: Visit `https://your-service.onrender.com/api/v1/health`
+2. **API Documentation**: Visit `https://your-service.onrender.com/docs`
+3. **Test Scraping**: Use the `/scrape` endpoint with a simple URL
+4. **Test Q&A**: Use the `/ask` endpoint after adding some content
+
+### Performance Optimization
+
+1. **Cold Start Issues**: Free tier services sleep after 15 minutes
+2. **Rate Limiting**: Configured for Mistral API limits
+3. **Memory Management**: FAISS index stored persistently
+4. **Logging**: Comprehensive logging for debugging
 
 ## 🔒 Security Notes
 

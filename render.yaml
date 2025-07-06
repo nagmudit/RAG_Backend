@@ -7,7 +7,7 @@ services:
     plan: free
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.1
+        value: 3.11.5
       - key: MISTRAL_API_KEY
         sync: false  # Set this manually in Render dashboard
       - key: FAISS_INDEX_PATH

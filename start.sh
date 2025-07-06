@@ -13,6 +13,10 @@ export PYTHONUNBUFFERED=1
 mkdir -p data
 
 echo "📦 Installing Python dependencies..."
+# Upgrade pip and install build dependencies first
+pip install --upgrade pip setuptools wheel
+
+# Install requirements
 pip install -r requirements.txt
 
 echo "🔧 Validating configuration..."
